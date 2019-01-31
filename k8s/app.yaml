@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productpromisedeventms
+spec:
+  selector:
+    matchLabels:
+      app: productpromisedeventms
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: productpromisedeventms
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - productpromisedeventms
+            topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: productpromisedeventms
+        image: gcr.io/cbh-event-pipeline/productpromisedeventms:0.0.0.1
+        readinessProbe:
+          httpGet:
+            path: /healthcheck
+            port: 8080
+      ports:
+        - containerPort: 8080
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always

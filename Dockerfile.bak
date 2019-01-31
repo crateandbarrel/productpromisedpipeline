@@ -1,0 +1,39 @@
+FROM google/golang
+
+ENV GOPATH /home/cfrye/go
+WORKDIR /home/cfrye/go/src/github.com/cfrye2000/crateAPI
+
+ADD . $GOPATH/src/github.com/cfrye2000/crateAPI
+
+RUN go get github.com/gorilla/mux
+RUN go get github.com/garyburd/redigo/redis
+RUN go get code.google.com/p/go-uuid/uuid
+
+RUN cd $GOPATH/src/github.com/cfrye2000/crateAPI
+
+RUN go install
+
+
+# Run the outyet command by default when the container starts.
+CMD $GOPATH/bin/crateAPI
+
+# Document that the service listens on port 8080.
+EXPOSE 8081
+
+#Create an Image
+#~/go/src/github.com/cfrye2000/crateAPI$ sudo docker build -t crateapi .
+
+#Start an Container
+#sudo docker run --publish 8081:8081 --name test --net="host" crateapi
+
+#Stop a Container
+#sudo docker stop test
+
+#Restart a Container
+#sudo docker restart test
+
+#Remove/Delete a Container
+#sudo docker rm test
+
+#Remove untagged images
+#sudo docker rmi -f $(sudo docker images | grep "<none>" | awk "{print \$3}")

@@ -1,0 +1,168 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Create a load balanced docker container with at minimum 2 EC2 instances behind a load balancer with a simple health check. The instances are created different AZ/Subnets. ",
+	"Parameters": {
+		"InstanceType": {
+			"Description": "Type of EC2 instance to launch",
+			"Type": "String",
+			"Default": "t2.small"
+		},
+		"RoleName" : {
+			"Description" : "Role description",
+			"Type": "String",
+			"Default" : "cbdefault",
+			"ConstraintDescription" : "Must be a valid IAM Role"
+		},
+		"WebServerPort": {
+			"Description": "TCP/IP port of the web server",
+			"Type": "String",
+			"Default": "8080"
+		},
+		"KeyName": {
+			"Description": "Name of an existing EC2 KeyPair to RDP access to the instances",
+			"Type": "AWS::EC2::KeyPair::KeyName",
+			"ConstraintDescription": "must be the name of an existing EC2 KeyPair.",
+			"Default": "Crate-Browser"
+		},
+		"fpVpcId": {
+			"Type": "String",
+			"Description": "VpcId of the vpc we are launching these load balancers in.",
+			"Default": "vpc-428ccd27"
+		},
+		"PrivateSubnetA": {
+			"Description": "The private subnets where instances live. ",
+			"Type": "String",
+			"Default": "subnet-98a127b3"
+		},
+		"PrivateSubnetB": {
+			"Description": "The private subnets where instances live. ",
+			"Type": "String",
+			"Default": "subnet-d2562ea5"
+		},
+		"Image": {
+			"Description": "The base image",
+			"Type": "String",
+			"Default": "ami-1ecae776"
+		},
+		"DockerName": {
+			"Description": "The docker image name",
+			"Type": "String",
+			"Default": "cratepi-aws-external"
+		},
+		"DockerTag": {
+			"Description": "The docker tag/build name",
+			"Type": "String",
+			"Default": "latest"
+		},
+		"S3LoggingBucket": {
+			"Description": "Where to put the elb logs",
+			"Type": "String",
+			"Default": "crateapilogs"
+		},		
+		"sgroup": {
+			"Description": "Security Group for the instances",
+			"Type": "String",
+			"Default": "sg-c9ed68ad"
+		},
+		"PublicSubnets": {
+			"Description": "The public subnets that have access to the private subnets where instances live. The Natbox will hang here",
+			"Type": "CommaDelimitedList",
+			"Default": "subnet-1f6cea34,subnet-d185fda6"
+		}
+	},
+	"Resources": {
+		"PrivateElasticLoadBalancer": {
+			"Type": "AWS::ElasticLoadBalancing::LoadBalancer",
+			"Properties": {
+				"SecurityGroups": ["sg-aa0d54ce"],
+				"CrossZone": "true",
+				"Subnets": {
+					"Ref": "PublicSubnets"
+				},
+				"Scheme": "internet-facing",
+				"Listeners": [{
+					"LoadBalancerPort": "80",
+					"InstancePort": {
+						"Ref": "WebServerPort"
+					},
+					"Protocol": "HTTP"
+				}],
+				"Tags": [{
+					"Key": "CostCenter",
+					"Value": "CrateBrowser"
+				}],
+				"HealthCheck": {
+					"Target": {
+						"Fn::Join": ["",
+						["HTTP:",
+						{
+							"Ref": "WebServerPort"
+						},
+						"/v1/healthcheck"]]
+					},
+					"HealthyThreshold": "3",
+					"UnhealthyThreshold": "5",
+					"Interval": "30",
+					"Timeout": "5"
+				}
+			}
+		},
+		"DockerServerScalingGroup": {
+			"Type": "AWS::AutoScaling::AutoScalingGroup",
+			"Properties": {
+				"AvailabilityZones": ["us-east-1a","us-east-1b"],
+				"LaunchConfigurationName": {
+					"Ref": "DockerLaunchConfiguration"
+				},
+				"MinSize": "2",
+				"MaxSize": "4",
+				"LoadBalancerNames": [{
+					"Ref": "PrivateElasticLoadBalancer"
+				}],
+				"VPCZoneIdentifier": [{
+					"Ref": "PrivateSubnetA"
+				},
+				{
+					"Ref": "PrivateSubnetB"
+				}],
+				"Tags": [{
+					"Key": "CostCenter",
+					"Value": "CrateBrowser",
+					"ResourceType": "auto-scaling-group",
+					"PropagateAtLaunch": true
+				}]
+			}
+		},
+		"DockerLaunchConfiguration": {
+			"Type": "AWS::AutoScaling::LaunchConfiguration",
+			"Properties": {
+				"ImageId": {
+					"Ref": "Image"
+				},
+				"IamInstanceProfile"  : {
+					"Ref" : "RoleName" 
+				},
+				"InstanceType": {
+					"Ref": "InstanceType"
+				},
+				"KeyName": {
+					"Ref": "KeyName"
+				},
+				"SecurityGroups": [{
+					"Ref": "sgroup"
+				}],
+		        "UserData" : { "Fn::Base64" : { "Fn::Join" : ["", [
+						"#!/bin/sh\n",
+						"# Install Upgrades\n",
+						"yum update -y\n",
+						"yum install -y docker\n",
+						"echo 'OPTIONS=\"--insecure-registry 10.10.162.48:5000\"' > /etc/sysconfig/docker\n",
+						"service docker start\n",
+						"docker pull 10.10.162.48:5000/",{ "Ref" : "DockerName" },":",{ "Ref" : "DockerTag" },"\n",
+						"docker run -d --restart=always --publish 8080:8080 --name crateapi 10.10.162.48:5000/",{ "Ref" : "DockerName" }
+					]]}				
+				}	
+			}
+		}
+	}
+}

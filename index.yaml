@@ -1,0 +1,39 @@
+indexes:
+
+- kind: SkyDayGroup
+  properties:
+   - name: TwitterHandle
+   - name: DateAdded
+     direction: desc
+- kind: SkyDayGroup
+  properties:
+   - name: Status
+   - name: DateAdded
+     direction: desc
+- kind: Image
+  properties:
+   - name: Country
+   - name: Timestamp
+- kind: Image
+  properties:
+   - name: Status
+   - name: Timestamp
+- kind: Image
+  properties:
+   - name: GroupID
+   - name: Timestamp
+- kind: Image
+  properties:
+   - name: Country
+   - name: Timestamp
+     direction: desc
+- kind: Image
+  properties:
+   - name: Status
+   - name: Timestamp
+     direction: desc
+- kind: Image
+  properties:
+   - name: GroupID
+   - name: Timestamp
+     direction: desc

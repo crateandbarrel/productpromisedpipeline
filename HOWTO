@@ -1,0 +1,87 @@
+~/google-cloud-sdk/bin/gcloud app deploy --project productpromisedeventms
+
+
+kubectl create secret tls cbh-pipeline-tls-secret --key /tmp/tls.key --cert /tmp/tls.crt
+
+
+ab -p test.json -l -T application/json -H 'Authorization: Bearer  8994e8f6-31ec-11e8-b0ba-ac220b4cfea0' -c 1 -n 10 http://10.10.5.106:8090/events
+
+ab -p test.json -l -T application/json -H 'Authorization: Bearer  783470da-231a-11e9-92ff-0a580a3c0104' -c 1 -n 10 https://events.cb.crateandbarrel.com/productpromisedevents
+
+
+TOKEN
+-----
+
+redis-cli -h 10.10.165.61 SET 0d8260fe-53c7-11e8-a04f-0242ac110005:OAuthAccessToken "{\"access_token\":\"0d8260fe-53c7-11e8-a04f-0242ac110005\",\"client_id\":\"chrislong\",\"grant_type\":\"client_credentials\",\"expiration\":3156124600,\"secruity_level\":9,\"hits_per_minute\":-1}"
+
+CORS
+----
+
+curl -H "Origin: www.example.com"  \
+  -H "Access-Control-Request-Method: GET" \
+  -H "Access-Control-Request-Headers: X-Requested-With" \
+  -X OPTIONS \
+  --verbose \
+  https://productpromisedeventms.appspot.com/marketingcustomers/25906587
+
+
+ curl -H "Origin: https://foo.bar.org"  \
+  -H "Access-Control-Request-Method: CHRIS" \
+  -H "Access-Control-Request-Headers: origin, x-requested-with" \
+  -X OPTIONS \
+  --verbose \
+  https://productpromisedeventms.appspot.com/marketingcustomers/25906587
+
+
+curl --insecure -H "Origin: www.crateandbarrel.com"  -H "Authorization: Bearer 0d8260fe-53c7-11e8-a04f-0242ac110005" --verbose https://productpromisedeventms.appspot.com/marketingcustomers/25906587
+
+START SERVICE
+-------------
+
+./crateAPI 2> log.csv
+
+BASIC CALL
+----------
+
+curl --insecure -H "Authorization: Bearer 59a474a7-d56e-11e4-97f0-00505680035b" 'https://crateAPIE-PrivateE-13T4HCJCMVWV9-408708959.us-east-1.elb.amazonaws.com/v1/items/050032'
+
+LOAD TEST
+---------
+
+ab -n 100 -c 10 -H "Authorization: Bearer 0d8260fe-53c7-11e8-a04f-0242ac110005" https://productpromisedeventms.appspot.com/ping
+
+ab -n 100 -c 10 https://productpromisedeventms.appspot.com/healthcheck
+
+
+SEARCH URL
+----------
+
+curl -XPOST 'http://yew-3816238.us-east-1.bonsai.io:80/products/item-cb-en-us/_search' -d '{"sort" : [{ "web_item" : "desc" }, { "_score" : "desc" }, "_score"],"query": {"function_score": {"query": {"query_string" : {"query" : "espressomaker"}}, "score_mode": "first","boost_mode": "sum"}},"size": 300, "min_score": 0.5}'
+
+
+UPSTART
+-------
+
+/var/log/crateAPI.log
+sudo service crateAPI start|stop|restart
+sudo vi /etc/init/crateAPI.conf
+init-checkconf /etc/init/crateAPI.conf
+
+SCRIPTS For deploying, etc.
+--------------------------
+jenkins@10.10.162.50/home/jenkins/scripts
+jenkins@10.10.162.50/home/jenkins/staging
+jenkins@10.10.162.50/home/jenkins/prod
+
+
+
+POST to TEST EMAIL WITH NO DEBUGGING INFO
+------------------------------------------
+
+{"emailID" : "246113","toEmailAddress" : "cfrye@crateandbarrel.com","emailDataString" : "{ \"Attributes\" : [{ \"Name\" : \"Customer\", \"Value\" : \"{\\\"emailAddress\\\":\\\"cfrye@crateandbarrel.com\\\"}\" }, { \"Name\" : \"Associate\", \"Value\" : \"{\\\"longNote\\\":\\\"Hi, Paige \\n\\n Bla bla bla...\\\", \\\"emailaddress\\\":\\\"cfrye@crateandbarrel.com\\\",\\\"copyAssociate\\\":true,\\\"assocateNumber\\\":1234567}\" }, { \"Name\" : \"Store\", \"Value\" : \"{ \\\"storeId\\\": [ \\\"22\\\" ], \\\"storeLocationNumber\\\": [ \\\"108\\\" ], \\\"name\\\": [ \\\"Old Orchard Center\\\" ], \\\"address1\\\": [ \\\"4999 Old Orchard Center\\\" ], \\\"address2\\\": [ \\\"\\\" ], \\\"city\\\": [ \\\"Skokie\\\" ], \\\"state\\\": [ \\\"IL\\\" ], \\\"zip\\\": [ \\\"60077\\\" ], \\\"publicTransportationComments\\\": [ \\\"\\\" ], \\\"distance\\\": [ \\\"4 miles\\\" ], \\\"phone\\\": [ \\\"847.674.6850\\\" ], \\\"comments\\\": [ \\\"\\\" ], \\\"sunHours\\\": [ \\\"10 am - 6 pm\\\" ], \\\"monHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"tuesHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"wedHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"thursHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"friHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"satHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"hoursComment\\\": [ \\\"Holiday Hours <BR>12/29 - 1/4 <BR>\\\" ], \\\"scheduleComments\\\": [ \\\"Holiday Hours <BR>12/8 - 12/14\\\" ], \\\"scheduleCommentsHeader\\\": [ \\\"\\\" ], \\\"hasFurniture\\\": [ \\\"True\\\" ], \\\"isMarimekko\\\": [ \\\"False\\\" ], \\\"isOutlet\\\": [ \\\"False\\\" ], \\\"longitude\\\": [ \\\"-87.749\\\" ], \\\"latitude\\\": [ \\\"42.0595\\\" ], \\\"link\\\": [ \\\"http://www.crateandbarrel.com/Stores/old-orchard-center/str108\\\" ], \\\"twitterUser\\\": [ \\\"CBOldOrchard\\\" ]}\" }, { \"Name\" : \"Products\", \"Value\" : \"[{ \\\"shortNote\\\": \\\"A First short note… bla bla\\\", \\\"sku\\\": \\\"619411\\\", \\\"description_short\\\": \\\"Steele Leather Sofa\\\", \\\"description_long\\\": \\\"Leather Sofa (C1)\\\", \\\"dimensions\\\": \\\"\\\", \\\"image_path_sm\\\": \\\"SteeleLthrSofaElephantF9\\\", \\\"image_path_lg\\\": \\\"SteeleLthrSofaElephantF9\\\", \\\"current_price\\\": \\\"$2999.00\\\", \\\"regular_price\\\": \\\"$2999.00\\\", \\\"assembly\\\": \\\"100\\\", \\\"stock_plus\\\": \\\"0\\\", \\\"basic_freight\\\": \\\"1\\\", \\\"gift_packaging\\\": \\\"0\\\", \\\"scp\\\": \\\"1\\\", \\\"scp_eligible\\\": \\\"1\\\", \\\"ship_via\\\": \\\"G\\\", \\\"department\\\": \\\"50\\\", \\\"class\\\": \\\"10\\\", \\\"primary_web_page\\\": \\\"0\\\", \\\"gr_category_id\\\": \\\"16\\\", \\\"tax_rate_code\\\": \\\"100\\\", \\\"is_housewares\\\": \\\"0\\\", \\\"is_furniture\\\": \\\"0\\\", \\\"is_outlet\\\": \\\"0\\\", \\\"is_current_catalogue\\\": \\\"0\\\", \\\"is_catalogue\\\": \\\"0\\\", \\\"is_internet\\\": \\\"0\\\", \\\"cb_exclusive\\\": \\\"1\\\", \\\"free_shipping\\\": \\\"0\\\", \\\"price_type\\\": \\\"R\\\", \\\"stocked_not_shown\\\": \\\"0\\\", \\\"is_hazmat\\\": \\\"0\\\", \\\"furniture_type\\\": \\\"0\\\", \\\"flat_rate_eligible\\\": \\\"0\\\", \\\"flat_rate_amount\\\": \\\"0.00\\\", \\\"description\\\": \\\"\\\", \\\"title\\\": \\\"Steele Leather Sofa\\\", \\\"threshold_eligible\\\": \\\"0\\\", \\\"is_international_ship\\\": \\\"0\\\", \\\"usps_eligible\\\": \\\"0\\\", \\\"is_marimekko\\\": \\\"0\\\", \\\"ad_std\\\": \\\"0.00\\\", \\\"ad_2dy\\\": \\\"0.00\\\", \\\"ad_nda\\\": \\\"0.00\\\", \\\"vendor_part_number\\\": \\\"527-5013L\\\", \\\"upc_isbn\\\": \\\"\\\", \\\"is_outlet_purchase\\\": \\\"0\\\", \\\"URLpath\\\": \\\"\\\", \\\"cust_service_flag\\\": \\\"0\\\", \\\"pickup_store_eligible\\\": \\\"0\\\", \\\"pickup_warehouse_eligible\\\": \\\"0\\\", \\\"item_function\\\": \\\"\\\", \\\"size_id\\\": \\\"0\\\", \\\"pattern_id\\\": \\\"0\\\", \\\"no_swatch\\\": \\\"0\\\", \\\"personalization_type\\\": \\\"\\\", \\\"expanded_assortment\\\": \\\"\\\", \\\"prop65\\\": \\\"\\\", \\\"cacheCreateDate\\\": \\\"Friday, January 16, 2015\\\", \\\"pc_isbn\\\": \\\"\\\", \\\"markdown_type\\\": \\\"\\\" }]\" } ]}","emailAnalysisString":"{ \"assoc\": \"1234567\", \"loc\": \"115\", \"products\": [ \"432775:15883:y\", \"432775:15889:y\" ]}"}
+
+
+POST to TEST EMAIL WITH DEBUGGING INFO
+------------------------------------------
+
+{"emailID" : "246113","toEmailAddress" : "cfrye@crateandbarrel.com","emailDataString" : "{ \"Attributes\" : [{\"Name\":\"showInputParameters\",\"Value\":\"true\"}, { \"Name\" : \"Customer\", \"Value\" : \"{\\\"emailAddress\\\":\\\"cfrye@crateandbarrel.com\\\"}\" }, { \"Name\" : \"Associate\", \"Value\" : \"{\\\"longNote\\\":\\\"Hi, Paige \\n\\n Bla bla bla...\\\", \\\"emailaddress\\\":\\\"cfrye@crateandbarrel.com\\\",\\\"copyAssociate\\\":true,\\\"assocateNumber\\\":1234567}\" }, { \"Name\" : \"Store\", \"Value\" : \"{ \\\"storeId\\\": [ \\\"22\\\" ], \\\"storeLocationNumber\\\": [ \\\"108\\\" ], \\\"name\\\": [ \\\"Old Orchard Center\\\" ], \\\"address1\\\": [ \\\"4999 Old Orchard Center\\\" ], \\\"address2\\\": [ \\\"\\\" ], \\\"city\\\": [ \\\"Skokie\\\" ], \\\"state\\\": [ \\\"IL\\\" ], \\\"zip\\\": [ \\\"60077\\\" ], \\\"publicTransportationComments\\\": [ \\\"\\\" ], \\\"distance\\\": [ \\\"4 miles\\\" ], \\\"phone\\\": [ \\\"847.674.6850\\\" ], \\\"comments\\\": [ \\\"\\\" ], \\\"sunHours\\\": [ \\\"10 am - 6 pm\\\" ], \\\"monHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"tuesHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"wedHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"thursHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"friHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"satHours\\\": [ \\\"10 am - 9 pm\\\" ], \\\"hoursComment\\\": [ \\\"Holiday Hours <BR>12/29 - 1/4 <BR>\\\" ], \\\"scheduleComments\\\": [ \\\"Holiday Hours <BR>12/8 - 12/14\\\" ], \\\"scheduleCommentsHeader\\\": [ \\\"\\\" ], \\\"hasFurniture\\\": [ \\\"True\\\" ], \\\"isMarimekko\\\": [ \\\"False\\\" ], \\\"isOutlet\\\": [ \\\"False\\\" ], \\\"longitude\\\": [ \\\"-87.749\\\" ], \\\"latitude\\\": [ \\\"42.0595\\\" ], \\\"link\\\": [ \\\"http://www.crateandbarrel.com/Stores/old-orchard-center/str108\\\" ], \\\"twitterUser\\\": [ \\\"CBOldOrchard\\\" ]}\" }, { \"Name\" : \"Products\", \"Value\" : \"[{ \\\"shortNote\\\": \\\"A First short note… bla bla\\\", \\\"sku\\\": \\\"619411\\\", \\\"description_short\\\": \\\"Steele Leather Sofa\\\", \\\"description_long\\\": \\\"Leather Sofa (C1)\\\", \\\"dimensions\\\": \\\"\\\", \\\"image_path_sm\\\": \\\"SteeleLthrSofaElephantF9\\\", \\\"image_path_lg\\\": \\\"SteeleLthrSofaElephantF9\\\", \\\"current_price\\\": \\\"$2999.00\\\", \\\"regular_price\\\": \\\"$2999.00\\\", \\\"assembly\\\": \\\"100\\\", \\\"stock_plus\\\": \\\"0\\\", \\\"basic_freight\\\": \\\"1\\\", \\\"gift_packaging\\\": \\\"0\\\", \\\"scp\\\": \\\"1\\\", \\\"scp_eligible\\\": \\\"1\\\", \\\"ship_via\\\": \\\"G\\\", \\\"department\\\": \\\"50\\\", \\\"class\\\": \\\"10\\\", \\\"primary_web_page\\\": \\\"0\\\", \\\"gr_category_id\\\": \\\"16\\\", \\\"tax_rate_code\\\": \\\"100\\\", \\\"is_housewares\\\": \\\"0\\\", \\\"is_furniture\\\": \\\"0\\\", \\\"is_outlet\\\": \\\"0\\\", \\\"is_current_catalogue\\\": \\\"0\\\", \\\"is_catalogue\\\": \\\"0\\\", \\\"is_internet\\\": \\\"0\\\", \\\"cb_exclusive\\\": \\\"1\\\", \\\"free_shipping\\\": \\\"0\\\", \\\"price_type\\\": \\\"R\\\", \\\"stocked_not_shown\\\": \\\"0\\\", \\\"is_hazmat\\\": \\\"0\\\", \\\"furniture_type\\\": \\\"0\\\", \\\"flat_rate_eligible\\\": \\\"0\\\", \\\"flat_rate_amount\\\": \\\"0.00\\\", \\\"description\\\": \\\"\\\", \\\"title\\\": \\\"Steele Leather Sofa\\\", \\\"threshold_eligible\\\": \\\"0\\\", \\\"is_international_ship\\\": \\\"0\\\", \\\"usps_eligible\\\": \\\"0\\\", \\\"is_marimekko\\\": \\\"0\\\", \\\"ad_std\\\": \\\"0.00\\\", \\\"ad_2dy\\\": \\\"0.00\\\", \\\"ad_nda\\\": \\\"0.00\\\", \\\"vendor_part_number\\\": \\\"527-5013L\\\", \\\"upc_isbn\\\": \\\"\\\", \\\"is_outlet_purchase\\\": \\\"0\\\", \\\"URLpath\\\": \\\"\\\", \\\"cust_service_flag\\\": \\\"0\\\", \\\"pickup_store_eligible\\\": \\\"0\\\", \\\"pickup_warehouse_eligible\\\": \\\"0\\\", \\\"item_function\\\": \\\"\\\", \\\"size_id\\\": \\\"0\\\", \\\"pattern_id\\\": \\\"0\\\", \\\"no_swatch\\\": \\\"0\\\", \\\"personalization_type\\\": \\\"\\\", \\\"expanded_assortment\\\": \\\"\\\", \\\"prop65\\\": \\\"\\\", \\\"cacheCreateDate\\\": \\\"Friday, January 16, 2015\\\", \\\"pc_isbn\\\": \\\"\\\", \\\"markdown_type\\\": \\\"\\\" }]\" } ]}","emailAnalysisString":"{ \"assoc\": \"1234567\", \"loc\": \"115\", \"products\": [ \"432775:15883:y\", \"432775:15889:y\" ]}"}

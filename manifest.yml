@@ -1,0 +1,7 @@
+applications:
+ - name: productPromisedEventMS
+   command: productPromisedEventMS
+   env:
+     GOVERSION: go1.8
+     GOPACKAGENAME: github.com/cfrye2000/productPromisedEventMS
+
